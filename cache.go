@@ -1,5 +1,11 @@
 package cache
 
+import "errors"
+
+var (
+	ErrCapSize = errors.New("cache capacity must be greater than zero")
+)
+
 type LRUCache interface {
     // Добавляет новое значение с ключом в кеш (с наивысшим приоритетом), возвращает true, если все прошло успешно
     // В случае дублирования ключа вернуть false
