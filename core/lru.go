@@ -12,24 +12,24 @@ type item struct {
 	value string
 }
 
-type lru struct {
+type LRUBasic struct {
 	cap   int
 	items map[string]*list.Element // item содержится соотв. в list.Element
 	queue *list.List
 }
 
-func NewLRUCache(n int) (cache.LRUCache, error) {
+func NewLRUBasicCache(n int) (*LRUBasic, error) {
 	if n <= 0 {
 		return nil, cache.ErrCapSize
 	}
-	return &lru{
+	return &LRUBasic{
 		cap:   n,
 		items: make(map[string]*list.Element),
 		queue: list.New(),
 	}, nil
 }
 
-func (l *lru) Add(key, value string) bool {
+func (l *LRUBasic) Add(key, value string) bool {
 	if _, ok := l.items[key]; ok {
 		return false
 	}
@@ -48,7 +48,7 @@ func (l *lru) Add(key, value string) bool {
 	return true
 }
 
-func (l *lru) Get(key string) (value string, ok bool) {
+func (l *LRUBasic) Get(key string) (value string, ok bool) {
 
 	e, ok := l.items[key]
 	if !ok {
@@ -60,7 +60,7 @@ func (l *lru) Get(key string) (value string, ok bool) {
 	return e.Value.(*item).value, true
 }
 
-func (l *lru) Remove(key string) (ok bool) {
+func (l *LRUBasic) Remove(key string) (ok bool) {
 
 	e, ok := l.items[key]
 	if !ok {
@@ -73,7 +73,7 @@ func (l *lru) Remove(key string) (ok bool) {
 }
 
 // Вытеснение (удаление) последнего элемента очереди (протухшие данные)
-func (l *lru) removeLast() {
+func (l *LRUBasic) removeLast() {
 	//l.Lock()
 	//defer l.Unlock()
 
@@ -84,18 +84,18 @@ func (l *lru) removeLast() {
 	}
 }
 
-func (l *lru) getFirst() *item {
+func (l *LRUBasic) getFirst() *item {
 	return l.queue.Front().Value.(*item)
 }
 
-func (l *lru) getLast() *item {
+func (l *LRUBasic) getLast() *item {
 	return l.queue.Back().Value.(*item)
 }
 
-func (l *lru) Cap() int {
+func (l *LRUBasic) Cap() int {
 	return l.cap
 }
 
-func (l *lru) Len() int {
+func (l *LRUBasic) Len() int {
 	return l.queue.Len()
 }

@@ -1,10 +1,10 @@
 package lru
 
 import (
-	"container/list"
 	"sync"
 
 	"github.com/gkv777/cache"
+	"github.com/gkv777/cache/core"
 )
 
 // По условиям задания (интерфейс LRUCache) и ключ и значение - строки
@@ -13,106 +13,49 @@ type item struct {
 	value string
 }
 
-type lru struct {
+type LRU struct {
 	sync.RWMutex
-	cap   int
-	items map[string]*list.Element // item содержится соотв. в list.Element
-	queue *list.List
+	q *core.LRUBasic
 }
 
 func NewLRUCache(n int) (cache.LRUCache, error) {
-	if n <= 0 {
-		return nil, cache.ErrCapSize
+	basic, err := core.NewLRUBasicCache(n)
+	if err != nil {
+		return nil, err
 	}
-	return &lru{
-		cap:   n,
-		items: make(map[string]*list.Element),
-		queue: list.New(),
+	return &LRU{
+		RWMutex: sync.RWMutex{},
+		q:       basic,
 	}, nil
 }
 
-func (l *lru) Add(key, value string) bool {
+func (l *LRU) Add(key, value string) bool {
 	l.Lock()
 	defer l.Unlock()
 
-	if _, ok := l.items[key]; ok {
-		return false
-	}
-	// Если
-	if l.queue.Len() == l.cap {
-		l.removeLast()
-	}
-	// Добавляем в начало списка новые данне
-	i := &item{
-		key:   key,
-		value: value,
-	}
-	e := l.queue.PushFront(i)
-
-	l.items[key] = e
-	return true
+	return l.q.Add(key, value)
 }
 
-func (l *lru) Get(key string) (value string, ok bool) {
+func (l *LRU) Get(key string) (value string, ok bool) {
 	l.Lock()
 	defer l.Unlock()
-
-	e, ok := l.items[key]
-	if !ok {
-		return "", false
-	}
-
-	// Перемещаем связанный с item элемент списка в начало
-	l.queue.MoveToFront(e)
-	return e.Value.(*item).value, true
+	return l.q.Get(key)
 }
 
-func (l *lru) Remove(key string) (ok bool) {
+func (l *LRU) Remove(key string) (ok bool) {
 	l.Lock()
 	defer l.Unlock()
-
-	e, ok := l.items[key]
-	if !ok {
-		return false
-	}
-
-	l.queue.Remove(e)
-	delete(l.items, key)
-	return true
+	return l.q.Remove(key)
 }
 
-// Вытеснение (удаление) последнего элемента очереди (протухшие данные)
-func (l *lru) removeLast() {
-	//l.Lock()
-	//defer l.Unlock()
-
-	// получаем последний элемент и удаляем
-	if e := l.queue.Back(); e != nil {
-		l.queue.Remove(e)
-		delete(l.items, e.Value.(*item).key)
-	}
-}
-
-func (l *lru) getFirst() *item {
+func (l *LRU) Cap() int {
 	l.RLock()
 	defer l.RUnlock()
-	return l.queue.Front().Value.(*item)
+	return l.q.Cap()
 }
 
-func (l *lru) getLast() *item {
+func (l *LRU) Len() int {
 	l.RLock()
 	defer l.RUnlock()
-	return l.queue.Back().Value.(*item)
-}
-
-func (l *lru) Cap() int {
-	l.RLock()
-	defer l.RUnlock()
-	return l.cap
-}
-
-func (l *lru) Len() int {
-	l.RLock()
-	defer l.RUnlock()
-	return l.queue.Len()
+	return l.q.Len()
 }

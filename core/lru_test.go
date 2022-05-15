@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func newLru(t *testing.T) *lru {
-	return &lru{
+func newLru(t *testing.T) *LRUBasic {
+	return &LRUBasic{
 		cap:   3,
 		items: make(map[string]*list.Element),
 		queue: list.New(),
@@ -16,11 +16,11 @@ func newLru(t *testing.T) *lru {
 }
 
 func TestNewLRUCache(t *testing.T) {
-	l, err := NewLRUCache(4)
+	l, err := NewLRUBasicCache(4)
 	require.NoError(t, err)
 	require.Equal(t, 4, l.Cap())
 	require.Equal(t, 0, l.Len())
-	l, err = NewLRUCache(0)
+	l, err = NewLRUBasicCache(0)
 	require.Error(t, err)
 	require.Equal(t, nil, l)
 }
