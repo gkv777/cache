@@ -1,9 +1,8 @@
-package core
+package cache
 
 import (
 	"container/list"
 
-	"github.com/gkv777/cache"
 )
 
 // По условиям задания (интерфейс LRUCache) и ключ и значение - строки
@@ -20,7 +19,7 @@ type LRUBasic struct {
 
 func NewLRUBasicCache(n int) (*LRUBasic, error) {
 	if n <= 0 {
-		return nil, cache.ErrCapSize
+		return nil, ErrCapSize
 	}
 	return &LRUBasic{
 		cap:   n,

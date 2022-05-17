@@ -1,25 +1,14 @@
-package lru
+package cache
 
-import (
-	"sync"
-
-	"github.com/gkv777/cache"
-	"github.com/gkv777/cache/core"
-)
-
-// По условиям задания (интерфейс LRUCache) и ключ и значение - строки
-type item struct {
-	key   string
-	value string
-}
+import "sync"
 
 type LRU struct {
 	sync.RWMutex
-	q *core.LRUBasic
+	q *LRUBasic
 }
 
-func NewLRUCache(n int) (cache.LRUCache, error) {
-	basic, err := core.NewLRUBasicCache(n)
+func NewLRUCache(n int) (LRUCache, error) {
+	basic, err := NewLRUBasicCache(n)
 	if err != nil {
 		return nil, err
 	}
