@@ -25,7 +25,7 @@ func newFifo(in, out int) (*fifo, error) {
 	}, nil
 }
 
-func (f *fifo) inFifo(key string) bool {
+func (f *fifo) exists(key string) bool {
 	if _, ok := f.in[key]; ok {
 		return true
 	}
@@ -36,7 +36,7 @@ func (f *fifo) inFifo(key string) bool {
 // Добавление к A1in:
 //
 func (f *fifo) Add(key, value string) bool {
-	if f.inFifo(key) {
+	if f.exists(key) {
 		return false
 	}
 	// Если А1in заполнен - вытесняем в A1out

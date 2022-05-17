@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -29,5 +30,33 @@ func TestNew2QCache(t *testing.T) {
 				//require.Equal(t, tc.lenLru, cache.lru.Len())
 			}
 		})
+	}
+}
+
+func TestAdd(t *testing.T) {
+	cache, _ := NewTwoQCache(10)
+	for i:= 0; i <=12; i++ {
+		key:= fmt.Sprintf("%d", i)
+		ok:= cache.Add(key, key)
+		require.Equal(t, true, ok)
+		if i < 7 {
+			require.Equal(t, i+1, cache.Len())
+		} else {
+			require.Equal(t, 8, cache.Len())
+		}	
+	}
+}
+
+func TestGet(t *testing.T) {
+	cache, _ := NewTwoQCache(10)
+	for i:= 0; i <=12; i++ {
+		key:= fmt.Sprintf("%d", i)
+		ok:= cache.Add(key, key)
+		require.Equal(t, true, ok)
+		if i < 7 {
+			require.Equal(t, i+1, cache.Len())
+		} else {
+			require.Equal(t, 8, cache.Len())
+		}	
 	}
 }

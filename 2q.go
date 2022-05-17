@@ -41,11 +41,24 @@ func NewTwoQCache(n int) (LRUCache, error) {
 }
 
 func (c *TwoQCache) Add(key, val string) bool {
-	return false
+	if c.lru.exists(key) {
+		return false
+	}
+	return c.fifo.Add(key, val)
 }
 
-func (c *TwoQCache) Get(val string) (string, bool) {
-	return "", false
+func (c *TwoQCache) Get(key string) (string, bool) {
+	if res, ok := c.lru.Get(key); ok {
+		return res, true
+	}
+	res, ok, out:= c.fifo.Get(key)
+	if !ok {
+		return "", false
+	}
+	if out {
+		c.lru.Add(key, res)		
+	}
+	return res, true
 }
 
 func (c *TwoQCache) Remove(key string) bool {
@@ -57,5 +70,5 @@ func (c *TwoQCache) Cap() int {
 }
 
 func (c *TwoQCache) Len() int {
-	return 0
+	return c.fifo.Len() + c.lru.Len()
 }

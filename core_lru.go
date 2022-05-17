@@ -83,6 +83,11 @@ func (l *lru) removeLast() {
 	}
 }
 
+func (l *lru) exists(key string) bool {
+	_, ok := l.items[key]
+	return ok
+}
+
 func (l *lru) getFirst() *item {
 	return l.queue.Front().Value.(*item)
 }
