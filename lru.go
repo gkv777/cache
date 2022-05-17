@@ -4,11 +4,11 @@ import "sync"
 
 type LRU struct {
 	sync.RWMutex
-	q *LRUBasic
+	q *lru
 }
 
 func NewLRUCache(n int) (LRUCache, error) {
-	basic, err := NewLRUBasicCache(n)
+	basic, err := newLru(n)
 	if err != nil {
 		return nil, err
 	}

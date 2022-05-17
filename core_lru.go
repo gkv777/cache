@@ -5,30 +5,30 @@ import (
 
 )
 
-// По условиям задания (интерфейс LRUCache) и ключ и значение - строки
 type item struct {
 	key   string
 	value string
 }
 
-type LRUBasic struct {
+type lru struct {
 	cap   int
-	items map[string]*list.Element // item содержится соотв. в list.Element
+	items map[string]*list.Element 
 	queue *list.List
 }
 
-func NewLRUBasicCache(n int) (*LRUBasic, error) {
+func newLru(n int) (*lru, error) {
 	if n <= 0 {
 		return nil, ErrCapSize
 	}
-	return &LRUBasic{
+	return &lru{
 		cap:   n,
 		items: make(map[string]*list.Element),
 		queue: list.New(),
 	}, nil
 }
 
-func (l *LRUBasic) Add(key, value string) bool {
+
+func (l *lru) Add(key, value string) bool {
 	if _, ok := l.items[key]; ok {
 		return false
 	}
@@ -47,7 +47,7 @@ func (l *LRUBasic) Add(key, value string) bool {
 	return true
 }
 
-func (l *LRUBasic) Get(key string) (value string, ok bool) {
+func (l *lru) Get(key string) (value string, ok bool) {
 
 	e, ok := l.items[key]
 	if !ok {
@@ -59,7 +59,7 @@ func (l *LRUBasic) Get(key string) (value string, ok bool) {
 	return e.Value.(*item).value, true
 }
 
-func (l *LRUBasic) Remove(key string) (ok bool) {
+func (l *lru) Remove(key string) (ok bool) {
 
 	e, ok := l.items[key]
 	if !ok {
@@ -72,7 +72,7 @@ func (l *LRUBasic) Remove(key string) (ok bool) {
 }
 
 // Вытеснение (удаление) последнего элемента очереди (протухшие данные)
-func (l *LRUBasic) removeLast() {
+func (l *lru) removeLast() {
 	//l.Lock()
 	//defer l.Unlock()
 
@@ -83,18 +83,18 @@ func (l *LRUBasic) removeLast() {
 	}
 }
 
-func (l *LRUBasic) getFirst() *item {
+func (l *lru) getFirst() *item {
 	return l.queue.Front().Value.(*item)
 }
 
-func (l *LRUBasic) getLast() *item {
+func (l *lru) getLast() *item {
 	return l.queue.Back().Value.(*item)
 }
 
-func (l *LRUBasic) Cap() int {
+func (l *lru) Cap() int {
 	return l.cap
 }
 
-func (l *LRUBasic) Len() int {
+func (l *lru) Len() int {
 	return l.queue.Len()
 }

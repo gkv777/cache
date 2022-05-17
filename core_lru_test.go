@@ -1,32 +1,31 @@
 package cache
 
 import (
-	"container/list"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
 
-func newLru(t *testing.T) *LRUBasic {
+/*func createLru(t *testing.T) *LRUBasic {
 	return &LRUBasic{
 		cap:   3,
 		items: make(map[string]*list.Element),
 		queue: list.New(),
 	}
-}
+}*/
 
 func TestNewLRUCache(t *testing.T) {
-	l, err := NewLRUBasicCache(4)
+	l, err := newLru(4)
 	require.NoError(t, err)
 	require.Equal(t, 4, l.Cap())
 	require.Equal(t, 0, l.Len())
-	l, err = NewLRUBasicCache(0)
+	l, err = newLru(0)
 	require.Error(t, err)
-	require.Equal(t, nil, l)
+	require.Nil(t, l)
 }
 
 func Test_lruAdd(t *testing.T) {
-	l := newLru(t)
+	l, _ := newLru(3)
 
 	t.Run("key1", func(t *testing.T) {
 		ok := l.Add("key1", "value1")
@@ -73,9 +72,9 @@ func Test_lruGet(t *testing.T) {
 	items := []struct {
 		key string
 		val string
-	}{{"key1", "value1"},{"key2", "value2"},{"key3", "value3"},{"key4", "value4"},}
+	}{{"key1", "value1"}, {"key2", "value2"}, {"key3", "value3"}, {"key4", "value4"}}
 
-	l := newLru(t)
+	l, _ := newLru(3)
 	for _, i := range items {
 		l.Add(i.key, i.val)
 	}
@@ -101,9 +100,9 @@ func Test_lruRemove(t *testing.T) {
 	items := []struct {
 		key string
 		val string
-	}{{"key1", "value1"},{"key2", "value2"},{"key3", "value3"},{"key4", "value4"},}
+	}{{"key1", "value1"}, {"key2", "value2"}, {"key3", "value3"}, {"key4", "value4"}}
 
-	l := newLru(t)
+	l,_ := newLru(3)
 	for _, i := range items {
 		l.Add(i.key, i.val)
 	}
