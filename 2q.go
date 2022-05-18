@@ -15,14 +15,19 @@ type TwoQCache struct {
 	lru  *lru
 }
 
+func getCacheSizes(n int) (int, int, int) {
+	sizeA1out := int(float64(n) * OUT_SIZE)
+	sizeAm := int(float64(n) * LRU_SIZE)
+	sizeA1in := n - sizeA1out - sizeAm
+	return sizeA1in, sizeA1out, sizeAm
+}
+
 func NewTwoQCache(n int) (LRUCache, error) {
 	if n <= 0 {
 		return nil, ErrCapSize
 	}
 
-	sizeA1out := int(float64(n) * OUT_SIZE)
-	sizeAm := int(float64(n) * LRU_SIZE)
-	sizeA1in := n - sizeA1out - sizeAm
+	sizeA1in, sizeA1out, sizeAm := getCacheSizes(n)
 
 	lru, err := newLru(sizeAm)
 	if err != nil {
