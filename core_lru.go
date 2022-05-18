@@ -5,11 +5,6 @@ import (
 
 )
 
-type item struct {
-	key   string
-	value string
-}
-
 type lru struct {
 	cap   int
 	items map[string]*list.Element 

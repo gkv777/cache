@@ -10,7 +10,7 @@ const (
 )
 
 type TwoQCache struct {
-	sync.Mutex
+	sync.RWMutex
 	fifo *fifo
 	lru  *lru
 }
@@ -46,6 +46,8 @@ func NewTwoQCache(n int) (LRUCache, error) {
 }
 
 func (c *TwoQCache) Add(key, val string) bool {
+	c.Lock()
+	defer c.Unlock()
 	if c.lru.exists(key) {
 		return false
 	}
@@ -53,6 +55,8 @@ func (c *TwoQCache) Add(key, val string) bool {
 }
 
 func (c *TwoQCache) Get(key string) (string, bool) {
+	c.Lock()
+	defer c.Unlock()
 	if res, ok := c.lru.Get(key); ok {
 		return res, true
 	}
@@ -67,13 +71,14 @@ func (c *TwoQCache) Get(key string) (string, bool) {
 }
 
 func (c *TwoQCache) Remove(key string) bool {
+	c.Lock()
+	defer c.Unlock()
+	if c.lru.exists(key) {
+		return c.lru.Remove(key)
+	}
+	if c.fifo.exists(key) {
+		return c.fifo.Remove(key)
+	}
 	return false
 }
 
-func (c *TwoQCache) Cap() int {
-	return 0
-}
-
-func (c *TwoQCache) Len() int {
-	return c.fifo.Len() + c.lru.Len()
-}
