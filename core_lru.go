@@ -1,28 +1,19 @@
-package lru
+package cache
 
 import (
 	"container/list"
-	"sync"
 
-	"github.com/gkv777/cache"
 )
 
-// По условиям задания (интерфейс LRUCache) и ключ и значение - строки
-type item struct {
-	key   string
-	value string
-}
-
 type lru struct {
-	sync.RWMutex
 	cap   int
-	items map[string]*list.Element // item содержится соотв. в list.Element
+	items map[string]*list.Element 
 	queue *list.List
 }
 
-func NewLRUCache(n int) (cache.LRUCache, error) {
+func newLru(n int) (*lru, error) {
 	if n <= 0 {
-		return nil, cache.ErrCapSize
+		return nil, ErrCapSize
 	}
 	return &lru{
 		cap:   n,
@@ -31,10 +22,8 @@ func NewLRUCache(n int) (cache.LRUCache, error) {
 	}, nil
 }
 
-func (l *lru) Add(key, value string) bool {
-	l.Lock()
-	defer l.Unlock()
 
+func (l *lru) Add(key, value string) bool {
 	if _, ok := l.items[key]; ok {
 		return false
 	}
@@ -54,8 +43,6 @@ func (l *lru) Add(key, value string) bool {
 }
 
 func (l *lru) Get(key string) (value string, ok bool) {
-	l.Lock()
-	defer l.Unlock()
 
 	e, ok := l.items[key]
 	if !ok {
@@ -68,8 +55,6 @@ func (l *lru) Get(key string) (value string, ok bool) {
 }
 
 func (l *lru) Remove(key string) (ok bool) {
-	l.Lock()
-	defer l.Unlock()
 
 	e, ok := l.items[key]
 	if !ok {
@@ -93,26 +78,23 @@ func (l *lru) removeLast() {
 	}
 }
 
+func (l *lru) exists(key string) bool {
+	_, ok := l.items[key]
+	return ok
+}
+
 func (l *lru) getFirst() *item {
-	l.RLock()
-	defer l.RUnlock()
 	return l.queue.Front().Value.(*item)
 }
 
 func (l *lru) getLast() *item {
-	l.RLock()
-	defer l.RUnlock()
 	return l.queue.Back().Value.(*item)
 }
 
 func (l *lru) Cap() int {
-	l.RLock()
-	defer l.RUnlock()
 	return l.cap
 }
 
 func (l *lru) Len() int {
-	l.RLock()
-	defer l.RUnlock()
 	return l.queue.Len()
 }
